@@ -44,7 +44,7 @@
 #include <so3_math.h>
 #include <ros/ros.h>
 #include <Eigen/Core>
-#include <opencv/cv.h>
+#include <opencv2/opencv.hpp>
 #include <common_lib.h>
 #include <kd_tree/ikd_Tree.h>
 #include "IMU_Processing.hpp"
@@ -873,6 +873,7 @@ public:
         m_imu_process = p_imu;
         fout_pre.open(DEBUG_FILE_DIR("mat_pre.txt"), std::ios::out);
         fout_out.open(DEBUG_FILE_DIR("mat_out.txt"), std::ios::out);
+        std::cout << "root dir2 = " << root_dir << " " << ROOT_DIR << std::endl;
         if (fout_pre && fout_out)
             std::cout << "~~~~" << ROOT_DIR << " file opened" << std::endl;
         else
@@ -1204,7 +1205,7 @@ public:
                                     coeffSel_tmpt->points[i].intensity = pd2;
 
                                     // if(i%50==0) std::cout<<"s: "<<s<<"last res: "<<res_last[i]<<" current res: "<<std::abs(pd2)<<std::endl;
-                                    res_last[i] = std::abs(pd2);
+                                    res_last[i] = std::abs(pd2); // residual
                                 }
                                 else
                                 {

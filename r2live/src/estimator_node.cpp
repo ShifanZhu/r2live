@@ -566,12 +566,12 @@ void process()
                 if (g_camera_lidar_queue.m_if_have_lidar_data && (estimator.solver_flag == Estimator::SolverFlag::NON_LINEAR))
                 {
                     *p_imu = *(estimator.m_fast_lio_instance->m_imu_process);
-                    state_aft_integration = p_imu->imu_preintegration(g_lio_state, imu_queue, 0, cam_update_tim - imu_queue.back()->header.stamp.toSec());
+                    state_aft_integration = p_imu->imu_preintegration(g_lio_state, imu_queue, 0, cam_update_tim - imu_queue.back()->header.stamp.toSec()); // imu integration based on lated LIO state
                     estimator.m_lio_state_prediction_vec[WINDOW_SIZE] = state_aft_integration;
                     
                     diff_vins_lio_q = eigen_q(estimator.Rs[WINDOW_SIZE].transpose() * state_aft_integration.rot_end);
                     diff_vins_lio_t = state_aft_integration.pos_end - estimator.Ps[WINDOW_SIZE];
-                    if (diff_vins_lio_t.norm() > 1.0)
+                    if (diff_vins_lio_t.norm() > 1.0) // translation is larger than 1 meter
                     {
                         // ROS_INFO("VIO subsystem restart ");
                         estimator.refine_vio_system(diff_vins_lio_q, diff_vins_lio_t);
@@ -723,7 +723,7 @@ void process()
                         eigen_q q_I = eigen_q(1.0, 0, 0, 0);
                         double angular_diff = eigen_q(g_lio_state.rot_end.transpose() * state_before_esikf.rot_end).angularDistance(q_I) * 57.3;
                         double t_diff = (g_lio_state.pos_end - state_before_esikf.pos_end).norm();
-                        if ((t_diff > 0.2) || (angular_diff > 2.0))
+                        if ((t_diff > 0.2) || (angular_diff > 2.0)) // assume the translation is less than 0.2m, and rotation is less than 2 degree
                         {
                             g_lio_state = state_before_esikf;
                         }
@@ -739,7 +739,7 @@ void process()
             // Update state with pose graph optimization 
             g_lio_state = state_before_esikf;
             t_s.tic();
-            estimator.solve_image_pose(img_msg->header);
+            estimator.solve_image_pose(img_msg->header); // Do optimizaton and slidingWindow here
 
             if (g_camera_lidar_queue.m_if_have_lidar_data)
             {
@@ -768,7 +768,7 @@ void process()
                         eigen_q q_I = eigen_q(1.0, 0, 0, 0);
                         double angular_diff = eigen_q(temp_R.transpose() * state_before_esikf.rot_end).angularDistance(q_I) * 57.3;
                         double t_diff = (temp_T - state_before_esikf.pos_end).norm();
-                        if ((t_diff < 0.2) &&  (angular_diff < 2.0))
+                        if ((t_diff < 0.2) &&  (angular_diff < 2.0)) // assume the translation is less than 0.2m, and rotation is less than 2 degree
                         {
                             g_lio_state.cov = state_aft_integration.cov;
                             g_lio_state.last_update_time = cam_update_tim;
@@ -837,7 +837,9 @@ int main(int argc, char **argv)
     ros::NodeHandle nh("~");
     ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Info);
     // ros::console::set_logger_level(ROSCONSOLE_DEFAULT_NAME, ros::console::levels::Debug);
+    std::cout << "1" << std::endl;
     readParameters(nh);
+    std::cout << "10" << std::endl;
     estimator.setParameter();
 
     get_ros_parameter(nh, "/lidar_drag_cam_tim", g_camera_lidar_queue.m_lidar_drag_cam_tim, 1.0);

@@ -27,6 +27,7 @@ void Estimator::setParameter()
 
 void Estimator::clearState()
 {
+    std::cout << "clearState" << std::endl;
     for (int i = 0; i < WINDOW_SIZE + 1; i++)
     {
         Rs[i].setIdentity();
@@ -42,12 +43,14 @@ void Estimator::clearState()
             delete pre_integrations[i];
         pre_integrations[i] = nullptr;
     }
+    std::cout << "a" << std::endl;
 
     for (int i = 0; i < NUM_OF_CAM; i++)
     {
         tic[i] = Vector3d::Zero();
         ric[i] = Matrix3d::Identity();
     }
+    std::cout << "b" << std::endl;
 
     for (auto &it : m_all_image_frame)
     {
@@ -57,6 +60,7 @@ void Estimator::clearState()
             it.second.pre_integration = nullptr;
         }
     }
+    std::cout << "c" << std::endl;
 
     solver_flag = INITIAL;
     first_imu = false,
@@ -67,6 +71,7 @@ void Estimator::clearState()
     initial_timestamp = 0;
     m_all_image_frame.clear();
     td = TD;
+    std::cout << "d" << std::endl;
 
 
     if (tmp_pre_integration != nullptr)
@@ -74,14 +79,17 @@ void Estimator::clearState()
 
     tmp_pre_integration = nullptr;
     m_vio_margin_ptr = nullptr;
+    std::cout << "e" << std::endl;
 
     f_manager.clearState();
+    std::cout << "f" << std::endl;
 
     failure_occur = 0;
     relocalization_info = 0;
 
     drift_correct_r = Matrix3d::Identity();
     drift_correct_t = Vector3d::Zero();
+    std::cout << "g" << std::endl;
 }
 int apply_tr_times = 0;
 
